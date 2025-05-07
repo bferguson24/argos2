@@ -1,0 +1,21 @@
+{
+    //STM32F723E-DISCO with ST_Link
+    "version": "0.2.0",
+    "configurations": [
+    {
+        "name": "ARGOS Debug",
+        "cwd": "${workspaceFolder}",
+        "executable": "${workspaceFolder}/build/ARGOS_V2.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "stlink",
+        "armToolchainPath": "C:\\ProgramData\\chocolatey\\bin",
+        "stm32cubeprogrammer": "C:\\ST\\STM32CubeCLT_1.17.0\\STM32CubeProgrammer\\bin",
+        "preLaunchTask": "Build",
+        "device": "STM32F411VE",
+        "svdFile": "C:\\Users\\benny\\STM32Cube\\Repository\\STM32Cube_FW_F4_V1.28.1\\Drivers\\CMSIS\\STM32F411.svd"
+        
+        }   
+    ]   
+}   
