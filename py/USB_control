@@ -1,0 +1,16 @@
+import usb.core
+import usb.util
+import struct
+import time
+import json
+
+
+class SetpointCmd:
+    def __init__(self):
+        self.T1 = 0
+        self.T2 = 0
+        self.T3 = 0
+
+    def serialize(self):
+        # Pack the three floats (j1_torque, j2_torque, j3_torque) into a byte array
+        return struct.pack('fff', self.T1, self.T2, self.T3)

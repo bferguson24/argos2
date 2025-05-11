@@ -9,7 +9,7 @@
         "request": "launch",
         "type": "cortex-debug",
         "runToEntryPoint": "main",
-        "servertype": "stlink",
+        "servertype": "jlink",
         "armToolchainPath": "C:\\ProgramData\\chocolatey\\bin",
         "stm32cubeprogrammer": "C:\\ST\\STM32CubeCLT_1.17.0\\STM32CubeProgrammer\\bin",
         "preLaunchTask": "Build",
