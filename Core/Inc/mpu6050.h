@@ -73,6 +73,7 @@
 #define MPU6050_FIFO_COUNTL 0x73
 #define MPU6050_FIFO_R_W    0x74
 #define MPU6050_INT_STATUS 0x3A
+#define MPU6050_INT_CONFIG 0x37
 #define MPU6050_INT_ENABLE 0x38
 
 // Power Management
@@ -82,6 +83,8 @@
 // Device ID
 #define MPU6050_WHO_AM_I           0x75
 
+#define INT_RD_CLEAR_OFFS 4
+#define INT_LATCH_EN_OFFS 5
 
 
 typedef struct __attribute__((packed)){

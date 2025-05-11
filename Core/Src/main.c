@@ -24,6 +24,8 @@
 #include "motor.h"
 #include "mpu6050.h"
 #include "pca9685.h"
+#include "stm32f4xx_hal.h"
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -52,6 +54,7 @@ TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
 int16_t DMA_buffer[12];
+bool mpu6050_data_ready_flag; 
 
 
 motor_t motor1 = {
@@ -126,9 +129,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
  while (1)
   {
-    int16_t a = -5; 
-    mpu6050_read_data(&hi2c1, &imu); 
-
+    if (mpu6050_data_ready_flag){
+      
+        mpu6050_data_ready_flag = 0; 
+        mpu6050_read_data(&hi2c1, &imu); 
+    }
+    // mpu6050_read_data(&hi2c1, &imu); 
+    // HAL_Delay(100); 
+     
     // motor_set_angle(&motor1, 90); 
     /* USER CODE END WHILE */
 
@@ -350,7 +358,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 400000;
+  hi2c1.Init.ClockSpeed = 1000000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -445,15 +453,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pin : PA9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  /*Configure GPIO pin : PB4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

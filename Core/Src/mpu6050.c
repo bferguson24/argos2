@@ -34,9 +34,19 @@ void mpu6050_init(I2C_HandleTypeDef *hi2c, mpu6050_t *mpu){
         HAL_I2C_Master_Transmit(hi2c, mpu->device_address << 1, start_command, 2, HAL_MAX_DELAY); 
     }
 
-       {
+    {
+        uint8_t command[2] = {MPU6050_INT_CONFIG, ((1 << INT_RD_CLEAR_OFFS) | (1 << INT_LATCH_EN_OFFS))};
+        HAL_I2C_Master_Transmit(hi2c, mpu->device_address << 1, command, 2, HAL_MAX_DELAY);
+    }
+
+    {
         uint8_t start_command[2] = {MPU6050_INT_ENABLE, 1};   
         HAL_I2C_Master_Transmit(hi2c, mpu->device_address << 1, start_command, 2, HAL_MAX_DELAY); 
+    }
+
+    {
+        uint8_t command[2] = {MPU6050_CONFIG, 1};
+        HAL_I2C_Master_Transmit(hi2c, mpu->device_address << 1, command, 2, HAL_MAX_DELAY);
     }
 }
 
