@@ -83,29 +83,83 @@
 // Device ID
 #define MPU6050_WHO_AM_I           0x75
 
+//Bit Offsets
 #define INT_RD_CLEAR_OFFS 4
 #define INT_LATCH_EN_OFFS 5
+#define FS_SEL_OFFS 3 
+#define AFS_SEL_OFFS 3 
+
+//Scaling Constants:
+#define MPU6050_TIMER_SCALE_SECONDS 1e-6f //[s]
+#define MPU6050_FS_SEL0 250.0f //[deg/s]
+#define MPU6050_AFS_SEL 2.0f //[g]
+#define MPU6050_GYRO_SCALE 131.0f //[LSB/ (deg/s)]
+#define MPU6050_ACCEL_SCALE 16384.0f // [LSB / g]
+#define MPU6050_SAMPLE_TIME 0.2f
+
+
 
 
 typedef struct __attribute__((packed)){
-    int16_t ax; 
     int16_t ay; 
+    int16_t ax; 
     int16_t az; 
     int16_t temp;
-    int16_t gx; 
     int16_t gy; 
+    int16_t gx; 
     int16_t gz; 
 
 }imu_data_t;
 
+typedef enum{
+    STATE_START_TIME,
+    STATE_WAIT_TIME,
+    STATE_SAMPLE_DATA,
+    STATE_SAMPLE_COMPLETE, 
+}mpu6050_calibrate_t; 
+
 
 typedef struct {
+
+    //Info & Status
     uint16_t device_address; 
+    bool data_ready_flag; 
+    mpu6050_calibrate_t imu_calibration_state; 
+    uint32_t calibration_start_time; 
+    uint32_t curr_cnt;
+    uint32_t prev_cnt;
+
+    //Raw Data & Offsets
     imu_data_t data; 
+    int16_t sample_count; 
+    int16_t sample_idx; 
+    int32_t gyro_cal_sum[3]; 
+    float accel_cal_sum[3]; // Add this to your struct
+
+    int32_t gyro_offset[3];
+    int32_t accel_offset[3];    
+
+    //Dimensioned Data
+    float dt; 
+
+    float wx;
+    float wy;
+    float wz;
+
+    float roll;
+    float pitch;
+    float yaw; 
+
+    float ax;
+    float ay;
+    float az; 
 
 }mpu6050_t; 
 
 HAL_StatusTypeDef mpu6050_read_data(I2C_HandleTypeDef *hi2c, mpu6050_t *mpu); 
 void mpu6050_init(I2C_HandleTypeDef *hi2c, mpu6050_t *mpu); 
+void mpu6050_task(mpu6050_t *imu, I2C_HandleTypeDef *hi2c); 
+float mpu6050_elapsed_time(mpu6050_t *mpu); 
+void mpu6050_gyro_to_angle(mpu6050_t *imu); 
 
 

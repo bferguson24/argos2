@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
+#include "mpu6050.h"
 
 /* USER CODE END Includes */
 
@@ -58,7 +59,10 @@
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
 /* USER CODE BEGIN EV */
-extern bool mpu6050_data_ready_flag; 
+extern mpu6050_t imu; 
+extern TIM_HandleTypeDef htim2;
+
+
 
 /* USER CODE END EV */
 
@@ -206,7 +210,12 @@ void SysTick_Handler(void)
 void EXTI4_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI4_IRQn 0 */
-    mpu6050_data_ready_flag = 1;
+  imu.data_ready_flag = true; 
+
+  //Track Timing Between reads [s]
+  imu.prev_cnt = imu.curr_cnt; 
+  imu.curr_cnt = TIM2->CNT; 
+
   /* USER CODE END EXTI4_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
   /* USER CODE BEGIN EXTI4_IRQn 1 */
