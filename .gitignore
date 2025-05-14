@@ -3,3 +3,4 @@ build/
 compile_commands.json
 board_layout.pdf
 Drivers/tinyusb/examples/
+ozone/
