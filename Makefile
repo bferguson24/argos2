@@ -41,6 +41,7 @@ Core/Src/motor.c \
 Core/Src/pca9685.c \
 Core/Src/utility.c \
 Core/Src/mpu6050.c \
+Core/Src/filter.c \
 Core/Src/usb_descriptors.c \
 Core/Src/stm32f4xx_it.c \
 Core/Src/stm32f4xx_hal_msp.c \

@@ -61,8 +61,28 @@ motor_t motor1 = {
   .motorPin = 0,
 };
 
+moving_avg_t ax_f = {
+  .alpha = 0.9f,
+  .average = 0.0f
+};
+
+moving_avg_t ay_f = {
+  .alpha = 0.9f,
+  .average = 0.0f
+};
+
+moving_avg_t az_f = {
+  .alpha = 0.9f,
+  .average = 0.0f
+};
+
 mpu6050_t imu = {
   .device_address = 0x68,
+  .hi2c = &hi2c1,
+  
+  .ax_filtered = &ax_f,
+  .ay_filtered = &ay_f,
+  .az_filtered = &az_f
 }; 
 
 
@@ -129,7 +149,7 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   // PCA9685_Init();
-  mpu6050_init(&hi2c1, &imu);
+  mpu6050_init(&imu); 
   PCA9685_SetPWMFrequency(50);
   // HAL_TIM_Base_Start(&htim3); 
   HAL_TIM_Base_Start(&htim2); 
@@ -144,7 +164,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
  while (1)
   {
-    mpu6050_task(&imu, &hi2c1);
+    mpu6050_task(&imu); 
 
   }
     // mpu6050_read_data(&hi2c1, &imu); 

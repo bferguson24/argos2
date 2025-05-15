@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32f4xx_hal.h"
+#include "filter.h"
 
 // REGISTER ADDRESSES
 #pragma once
@@ -96,6 +97,7 @@
 #define MPU6050_GYRO_SCALE 131.0f //[LSB/ (deg/s)]
 #define MPU6050_ACCEL_SCALE 16384.0f // [LSB / g]
 #define MPU6050_SAMPLE_TIME 0.2f
+#define RAD_TO_DEG_SCALE 57.2957795131
 
 
 
@@ -112,19 +114,22 @@ typedef struct __attribute__((packed)){
 }imu_data_t;
 
 typedef enum{
-    STATE_START_TIME,
-    STATE_WAIT_TIME,
-    STATE_SAMPLE_DATA,
-    STATE_SAMPLE_COMPLETE, 
+    STATE_IMU_INIT,
+    STATE_RESET_OFFSETS, 
+    STATE_TIME_START,
+    STATE_TIME_WAIT,
+    STATE_SAMPLE_OFFSET,
+    STATE_SAMPLE_DATA, 
 }mpu6050_calibrate_t; 
 
 
 typedef struct {
 
     //Info & Status
+    I2C_HandleTypeDef *hi2c; 
     uint16_t device_address; 
     bool data_ready_flag; 
-    mpu6050_calibrate_t imu_calibration_state; 
+    mpu6050_calibrate_t status; 
     uint32_t calibration_start_time; 
     uint32_t curr_cnt;
     uint32_t prev_cnt;
@@ -140,6 +145,7 @@ typedef struct {
     int32_t accel_offset[3];    
 
     //Dimensioned Data
+    float alpha_fusion; 
     float dt; 
 
     float wx;
@@ -150,16 +156,24 @@ typedef struct {
     float pitch;
     float yaw; 
 
+    float accel_pitch;
+    float accel_roll;
+
     float ax;
     float ay;
     float az; 
 
+    moving_avg_t *ax_filtered;
+    moving_avg_t *ay_filtered;
+    moving_avg_t *az_filtered;
+
 }mpu6050_t; 
 
-HAL_StatusTypeDef mpu6050_read_data(I2C_HandleTypeDef *hi2c, mpu6050_t *mpu); 
-void mpu6050_init(I2C_HandleTypeDef *hi2c, mpu6050_t *mpu); 
-void mpu6050_task(mpu6050_t *imu, I2C_HandleTypeDef *hi2c); 
+HAL_StatusTypeDef mpu6050_read_data(mpu6050_t *mpu); 
+void mpu6050_init(mpu6050_t *imu); 
+void mpu6050_task(mpu6050_t *imu); 
 float mpu6050_elapsed_time(mpu6050_t *mpu); 
 void mpu6050_gyro_to_angle(mpu6050_t *imu); 
+void mpu6050_comp_filter(mpu6050_t *imu); 
 
 
