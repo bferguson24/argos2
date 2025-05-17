@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
+#include "timing.h"
 #include "utility.h"
 #include "filter.h"
 
@@ -75,13 +76,13 @@ void mpu6050_init(mpu6050_t *imu){
     
 }
 
-float mpu6050_elapsed_time(mpu6050_t *imu){
-    //Return the time in [s] between reads; 
-    uint32_t delta_count = imu->curr_cnt - imu->prev_cnt; 
-    float time_s = delta_count * MPU6050_TIMER_SCALE_SECONDS; 
-    imu->dt = time_s; 
-    return time_s; 
-}
+// float mpu6050_elapsed_time(mpu6050_t *imu){
+//     //Return the time in [s] between reads; 
+//     uint32_t delta_count = imu->curr_cnt - imu->prev_cnt; 
+//     float time_s = delta_count * MPU6050_TIMER_SCALE_SECONDS; 
+//     imu->dt = time_s; 
+//     return time_s; 
+// }
 
 HAL_StatusTypeDef mpu6050_read_data(mpu6050_t *imu){
     imu_data_t temp; 
@@ -103,7 +104,8 @@ HAL_StatusTypeDef mpu6050_read_data(mpu6050_t *imu){
 
 void mpu6050_calc_units(mpu6050_t *imu){
 
-    float dt = mpu6050_elapsed_time(imu); 
+    float dt = elapsed_time_s(imu->timer); 
+    // float dt = mpu6050_elapsed_time(imu); 
 
     //Calculate Angular Velocities [Deg/s]
     float wx = -(imu->data.gx - imu->gyro_offset[0]) / MPU6050_GYRO_SCALE; 
@@ -121,9 +123,9 @@ void mpu6050_calc_units(mpu6050_t *imu){
     imu->yaw   += wz * dt;
 
     //Acceleration [g]
-    imu->ax = (imu->data.ax - imu->accel_offset[0]) / MPU6050_ACCEL_SCALE; 
-    imu->ay = (imu->data.ay - imu->accel_offset[1]) / MPU6050_ACCEL_SCALE; 
-    imu->az = (imu->data.az - imu->accel_offset[2]) / MPU6050_ACCEL_SCALE; 
+    imu->ax = (imu->data.ax) / MPU6050_ACCEL_SCALE; 
+    imu->ay = (imu->data.ay) / MPU6050_ACCEL_SCALE; 
+    imu->az = (imu->data.az) / MPU6050_ACCEL_SCALE; 
 }
 
 void mpu6050_comp_filter(mpu6050_t *imu){
@@ -137,7 +139,7 @@ void mpu6050_comp_filter(mpu6050_t *imu){
 
     //Compute Accel Angles [gyro - Quick changes | accel - Long Term Stability]
     // imu->accel_roll  = atan2f(imu->az, imu->ay) * RAD_TO_DEG_SCALE; 
-    imu->accel_pitch = atan2f(ax_f, (sqrtf(ay_f*ay_f + az_f*az_f) ) ) * RAD_TO_DEG_SCALE;
+    imu->accel_pitch = atan2f(az_f, (sqrtf(ay_f*ay_f + az_f*az_f) ) ) * RAD_TO_DEG_SCALE;
 
     // //Fuse Data 
     // imu->roll  = ((1 - imu->alpha_fusion) * (imu->roll))  + ((imu->alpha_fusion * accel_roll)); 
@@ -152,7 +154,8 @@ void mpu6050_task(mpu6050_t *imu){
 
     //Read data & elapsed time
     mpu6050_read_data(imu); 
-    mpu6050_elapsed_time(imu); 
+    elapsed_time_s(imu->timer);
+    // mpu6050_elapsed_time(imu); 
 
     switch(imu->status){
 
@@ -190,7 +193,7 @@ void mpu6050_task(mpu6050_t *imu){
             break; 
 
         case(STATE_TIME_WAIT): 
-            float time_elapsed = (TIM2->CNT - imu->calibration_start_time) * MPU6050_TIMER_SCALE_SECONDS; 
+            float time_elapsed = (TIM2->CNT - imu->calibration_start_time) * TIMER_SCALE_SECONDS; 
             if (time_elapsed > MPU6050_SAMPLE_TIME){
                 imu->status = STATE_SAMPLE_OFFSET; 
                 return; 

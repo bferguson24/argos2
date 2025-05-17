@@ -38,6 +38,10 @@ BUILD_DIR = build
 C_SOURCES =  \
 Core/Src/main.c \
 Core/Src/motor.c \
+Core/Src/leg.c \
+Core/Src/quadruped.c \
+Core/Src/argos_parameters.c \
+Core/Src/timing.c \
 Core/Src/pca9685.c \
 Core/Src/utility.c \
 Core/Src/mpu6050.c \

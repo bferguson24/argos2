@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
 #include "mpu6050.h"
+#include "quadruped.h"
 
 /* USER CODE END Includes */
 
@@ -60,6 +61,7 @@
 extern DMA_HandleTypeDef hdma_adc1;
 /* USER CODE BEGIN EV */
 extern mpu6050_t imu; 
+extern timing_t timer;  
 extern TIM_HandleTypeDef htim2;
 
 
@@ -211,10 +213,15 @@ void EXTI4_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI4_IRQn 0 */
   imu.data_ready_flag = true; 
+  
 
+  timer.prev_cnt = timer.curr_cnt; 
+  timer.curr_cnt = TIM2->CNT;
   //Track Timing Between reads [s]
-  imu.prev_cnt = imu.curr_cnt; 
-  imu.curr_cnt = TIM2->CNT; 
+  // imu.prev_cnt = imu.curr_cnt; 
+  // imu.curr_cnt = TIM2->CNT; 
+
+  
 
   /* USER CODE END EXTI4_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);

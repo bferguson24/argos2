@@ -21,12 +21,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "motor.h"
 #include "mpu6050.h"
 #include "pca9685.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_tim.h"
 #include <stdbool.h>
+#include <time.h>
+#include "quadruped.h"
+#include "timing.h" 
 
 /* USER CODE END Includes */
 
@@ -57,9 +59,8 @@ TIM_HandleTypeDef htim3;
 /* USER CODE BEGIN PV */
 int16_t DMA_buffer[12];
 
-motor_t motor1 = {
-  .motorPin = 0,
-};
+timing_t timer = {
+}; 
 
 moving_avg_t ax_f = {
   .alpha = 0.9f,
@@ -79,18 +80,99 @@ moving_avg_t az_f = {
 mpu6050_t imu = {
   .device_address = 0x68,
   .hi2c = &hi2c1,
-  
+  .timer = &timer, 
   .ax_filtered = &ax_f,
   .ay_filtered = &ay_f,
   .az_filtered = &az_f
 }; 
 
+//Leg1
+motor_t motor1 = {
+  .motorPin = 0,
+};
 
-typedef struct {
-  
+motor_t motor2 = {
+  .motorPin = 1,
+};
+
+motor_t motor3 = {
+  .motorPin = 2,
+  };
+
+//Leg2
+motor_t motor4 = {
+  .motorPin = 3,
+};
+
+motor_t motor5 = {
+  .motorPin = 4,
+};
+
+motor_t motor6 = {
+  .motorPin = 5,
+};
+
+//Leg3
+  motor_t motor7 = {
+  .motorPin = 6,
+};
+
+motor_t motor8 = {
+  .motorPin = 7,
+};
+
+motor_t motor9 = {
+  .motorPin = 8,
+};
+
+//Leg3
+motor_t motor10 = {
+.motorPin = 9,
+};
+
+motor_t motor11 = {
+  .motorPin = 10,
+};
+
+motor_t motor12 = {
+  .motorPin = 11,
+};
 
 
-}packet_out_t;
+//Leg Definitions
+leg_t leg1 = {
+  .motorList = {&motor1, &motor2, &motor3},
+  .reflectionMap = {0, 0, 1, 1, 1, 1},
+  .d_torso_foot = {xf1, yf, zf},
+  .d_torso_hip = {L1, -height, width}
+};
+
+leg_t leg2 = {
+  .motorList = {&motor4, &motor5, &motor6},
+  .reflectionMap = {1,1 , 0, 1, -1, -1},
+  .d_torso_foot = {xf1, yf, -zf},
+  .d_torso_hip = {L1, -height, -width}
+}; 
+
+leg_t leg3 = {
+  .motorList = {&motor7, &motor8, &motor9},
+  .reflectionMap = {1, 0, 1, -1, 1, 1},
+  .d_torso_foot = {-xf2, yf, zf},
+  .d_torso_hip = {-L2, -height, width}
+}; 
+
+leg_t leg4 = {
+  .motorList = {&motor10, &motor11, &motor12},
+  .reflectionMap = {0, 1, 0, -1, -1, -1},
+  .d_torso_foot = {-xf2, yf, -zf},
+  .d_torso_hip = {-L2, -height, -width}
+};
+
+//Quadruped Definition
+quadruped_t argos = {
+  .legList = {&leg1, &leg2, &leg3, &leg4},
+  .walk_step_delay = 0.1 //[s]
+};
 
 
 
@@ -148,9 +230,11 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  // PCA9685_Init();
+  PCA9685_Init();
   mpu6050_init(&imu); 
   PCA9685_SetPWMFrequency(50);
+  quad_home(&argos);
+
   // HAL_TIM_Base_Start(&htim3); 
   HAL_TIM_Base_Start(&htim2); 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)DMA_buffer, 12);
@@ -165,6 +249,8 @@ int main(void)
  while (1)
   {
     mpu6050_task(&imu); 
+
+    // quad_task(&argos); 
 
   }
     // mpu6050_read_data(&hi2c1, &imu); 

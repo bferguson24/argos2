@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "stm32f4xx_hal.h"
 #include "filter.h"
+#include "timing.h"
 
 // REGISTER ADDRESSES
 #pragma once
@@ -145,6 +146,7 @@ typedef struct {
     int32_t accel_offset[3];    
 
     //Dimensioned Data
+    timing_t *timer; 
     float alpha_fusion; 
     float dt; 
 
